@@ -1,0 +1,489 @@
+/* style.css v1.0.4 — компактная модалка; фиксация зоны действий словарей; "Не знаю" по центру */
+:root{
+  --bg:#f6f7fb; --card:#fff; --text:#1f2430; --muted:#6b7280;
+  --green:#16a34a; --red:#dc2626; --border:#e5e7eb; --shadow:0 10px 30px rgba(16,24,40,.08);
+  --mint:#34d399; --mint-strong:#10b981; --mint-weak:#d1fae5;
+  --overlay:rgba(15,23,42,.6);
+}
+:root[data-theme="dark"]{
+  --bg:#0b1020; --card:#0f172a; --text:#e5e7eb; --muted:#9ca3af;
+  --green:#22c55e; --red:#ef4444; --border:#1f2937; --shadow:0 10px 30px rgba(0,0,0,.4);
+  --mint:#34d399; --mint-strong:#10b981; --mint-weak:#0b3b2f;
+  --overlay:rgba(2,6,23,.7);
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:var(--bg); color:var(--text);
+  display:flex; flex-direction:column;
+}
+
+/* Header */
+header{
+  padding:10px 14px;
+  display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:nowrap;
+  background:#fff; border-bottom:1px solid var(--border);
+}
+:root[data-theme="dark"] header{ background:var(--card); }
+.brand h1{font-size:26px;margin:0;font-weight:800}
+.brand .tagline{font-size:13px;color:var(--muted)}
+.ver{font-size:12px;color:var(--muted);margin-left:6px}
+.iconBtn{width:40px;height:40px;padding:0;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;border:1px solid var(--border);background:#fff;cursor:pointer;transition:transform .12s ease}
+.iconBtn:active{transform:scale(0.95)}
+.gear.spin{animation:spin .6s ease}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+/* ── Logo in header ───────────────────────────────────────────── */
+header .brand { display: flex; align-items: center; gap: 8px; }
+
+/* ── Adaptive logo background for themes ───────────────────────── */
+header .logo-mark {
+  width: 46px;
+  height: 46px;
+  border-radius: 6px;
+  background: var(--card);        /* фон под тему */
+  border: 1px solid var(--border);
+  padding: 2px;                   /* лёгкий "отступ", чтобы фон был виден */
+  object-fit: contain;
+  pointer-events: none;
+}
+
+:root[data-theme="dark"] header .logo-mark {
+  background: var(--card);        /* тёмный фон */
+  border-color: var(--border);
+}
+
+:root[data-theme="light"] header .logo-mark {
+  background: var(--bg);          /* светлый фон */
+  border-color: var(--border);
+}
+
+header .title-wrap { display:flex; flex-direction:column; line-height:1.1; }
+
+/* чуть сжать межстрочное — как в макете */
+header .title-wrap h1 { margin: 0; }
+header .title-wrap .tagline { margin-top: 2px; }
+
+/* кнопки справа остаются кликабельными поверх всего */
+header .controls { position: relative; z-index: 1; }
+
+/* Main Card */
+main{flex:1;display:grid;place-items:center;padding:14px}
+.card{
+  width: 640px; max-width: 94vw;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:24px;
+  box-shadow:var(--shadow);
+  text-align:center;
+}
+
+.topRow{
+  display:flex; align-items:center; justify-content:space-between;
+  min-height:40px; margin-bottom:4px;
+}
+.stars{display:flex; gap:6px; align-items:center}
+.starIcon{font-size:22px;color:#cbd5e1}
+.starIcon.filled{color:#fbbf24}
+
+.heart{
+  font-size:22px; background:none; border:none; cursor:pointer;
+  transition:transform .2s ease; color:inherit; line-height:1;
+  width:22px; height:22px; display:flex; align-items:center; justify-content:center;
+}
+.heart:active{transform:scale(0.9)}
+
+.word{font-size:36px; font-weight:800; margin:6px 0 2px; line-height:1.15}
+.hint{color:var(--muted); margin-bottom:12px; font-size:14px}
+
+/* Options grid */
+.options{
+  display:grid; grid-template-columns: 1fr 1fr;
+  gap:12px; justify-items:stretch; margin:14px 0 12px;
+}
+@media (max-width:420px){ .options{ grid-template-columns: 1fr; } }
+
+/* "Не знаю" — по центру всегда */
+.idkWrapper{
+  grid-column: 1 / -1;
+  display:flex; justify-content:center; margin-top:6px;
+}
+
+button{
+  padding:0 14px; border-radius:14px; font-size:17px; cursor:pointer;
+  transition:background .2s, transform .06s ease, filter .2s;
+}
+.optionBtn{
+  height:52px; border:none; color:#073b3a; background:var(--mint); font-weight:600; outline:none;
+}
+.optionBtn:focus{ outline:none; box-shadow:none; }
+.optionBtn:active{ transform:scale(0.98); }
+.optionBtn.correct{ background:var(--green); color:#fff; }
+.optionBtn.wrong{ background:var(--red); color:#fff; }
+
+/* "Не знаю" */
+button.ghost{
+  background:#f3f4f6; border:none; color:#111827;
+  margin-top:6px; height:42px; padding:0 16px;
+  border-radius:12px; font-size:15px; font-weight:600;
+  display:flex; align-items:center; justify-content:center;
+}
+:root[data-theme="dark"] button.ghost{
+  background:#1f2937; color:#e5e7eb; border:1px solid #374151; box-shadow:0 0 0 3px rgba(55,65,81,.22) inset;
+}
+button.ghost:hover{ filter:brightness(1.06); }
+
+/* Stats */
+.statsBar{
+  margin-top:8px; font-size:12px; color:var(--muted);
+  border:1px solid var(--border); border-radius:10px; padding:6px 10px;
+  display:inline-block; background:#fff;
+}
+:root[data-theme="dark"] .statsBar{ background:var(--card); color:var(--muted); border-color:var(--border); }
+
+/* Modal */
+.modal.hidden{display:none}
+.modal{position:fixed; inset:0; display:grid; place-items:center; z-index:50}
+.backdrop{position:absolute; inset:0; background:var(--overlay)}
+.dialog{
+  position:relative; z-index:10;
+  background:#fff; border:1px solid var(--border); border-radius:14px;
+  padding:14px;
+  box-shadow:var(--shadow);
+  width:min(860px,94vw); max-height:90vh; overflow:auto;
+}
+:root[data-theme="dark"] .dialog{ background:var(--card); }
+.dialog h2{ text-align:center; margin:0 0 8px; font-size:26px; }
+
+/* Settings */
+.field{ margin:10px 0; text-align:center; }
+.field .label{ font-weight:700; margin-bottom:6px; text-align:center; font-size:16px; }
+.field .row{ display:flex; flex-wrap:wrap; justify-content:center; gap:8px; }
+
+/* Pills */
+.pills .pill{
+  display:inline-flex; align-items:center; gap:6px;
+  border:1px solid var(--border); background:#fff; color:inherit;
+  padding:6px; border-radius:12px; cursor:pointer;
+  width:40px; height:40px; font-size:18px; justify-content:center;
+}
+:root[data-theme="dark"] .pills .pill{ background:var(--card); color:var(--text); }
+.pills .pill.selected{ border-color:var(--mint); background:var(--mint-weak); }
+#langPills .pill span, #themePills .pill span{ display:none; }
+
+/* Complexity stars */
+.repeatPicker{ display:flex; justify-content:center; gap:6px; align-items:center; }
+.rpStar{
+  border:none; background:none; font-size:24px; cursor:pointer; line-height:1; color:#9ca3af;
+}
+.rpStar.filled{ color:#f59e0b; }
+.rpStar:active{ transform:scale(0.95); }
+
+/* Dict list — сетка с фиксированной колонкой под действия */
+.dictList{
+  display:flex; flex-direction:column; gap:6px; margin-top:6px;
+  max-height:200px; overflow-y:auto;
+}
+/* Три колонки: флаг | имя (растяг.) | действия (фикс.) */
+.dictRow{
+  display:grid;
+  grid-template-columns: 22px 1fr 110px;
+  align-items:center; gap:8px;
+  padding:8px 10px;
+  border:1px solid var(--border); border-radius:12px; background:#fff;
+}
+:root[data-theme="dark"] .dictRow{ background:var(--card); }
+.dictRow.active{
+  border-color:var(--mint); background:var(--mint-weak);
+  box-shadow:0 0 0 2px rgba(52,211,153,.12) inset;
+}
+.dictFlag{ font-size:16px; width:22px; text-align:center; }
+.dictName{
+  font-weight:600; font-size:15px;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; cursor:pointer;
+}
+.dictActions{ display:flex; gap:6px; justify-content:flex-end; }
+.iconOnly{
+  width:30px; height:30px; border:1px solid var(--border); border-radius:10px; background:#fff; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; font-size:15px;
+}
+:root[data-theme="dark"] .iconOnly{ background:var(--card); }
+.iconOnly:hover{ filter:brightness(1.06); }
+.iconOnly:active{ transform:scale(0.96); }
+
+/* Импорт — (в этой версии отключен, кнопки нет) */
+
+/* OK — компактнее */
+.modalActions{ display:flex; justify-content:center; margin-top:10px; }
+.modalActions .primary{
+  padding:9px 20px; font-size:15px; border-radius:10px;
+  background:var(--mint); border:none; color:#073b3a;
+}
+.modalActions .primary:hover{ background:var(--mint-strong); color:#fff; }
+
+/* Footer */
+footer{
+  padding:10px 14px; color:#6b7280;
+  border-top:1px solid var(--border);
+  font-size:13px; text-align:center
+}
+.copyright{color:#6b7280}
+
+/* Small screens */
+@media (max-width:600px){
+  .brand h1{font-size:22px}
+  .card{ padding:20px }
+  .word{font-size:30px}
+  .optionBtn{font-size:15px; height:50px}
+}
+/* === Патч: верхние кнопки (тема, язык, словарь) в одну линию === */
+header .controls {
+  display: flex;
+  flex-direction: row !important; /* принудительно в ряд */
+  gap: 10px;
+  align-items: center;
+  z-index: 10; /* чтобы они были поверх и кликабельные */
+}
+
+header .controls .iconBtn {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+}
+/* ============================================================================
+   [PATCH 01] Токены для кнопок шапки и "Не знаю" (светлая тема по умолчанию)
+   ========================================================================== */
+:root {
+  /* Шапка — кнопки-инструменты */
+  --tool-bg: #f5f7fb;
+  --tool-border: #e2e8f0;
+  --tool-fg: #0f172a;
+
+  /* "Не знаю" */
+  --idk-fg: #0f172a;
+  --idk-border: #cbd5e1;
+  --idk-bg: transparent;
+
+  /* Фокус */
+  --focus-ring: #22c55e40; /* мягкое зелёное */
+}
+
+/* Тёмная тема: поддержка и для class, и для data-аттрибута */
+body.theme-dark, [data-theme="dark"] {
+  --tool-bg: #0f172a;      /* тёмный карточный фон */
+  --tool-border: #1f2937;  /* тонкая рамка */
+  --tool-fg: #e5e7eb;
+
+  --idk-fg: #e5e7eb;
+  --idk-border: #334155;
+  --idk-bg: transparent;
+
+  --focus-ring: #22c55e55;
+}
+
+/* ============================================================================
+   [PATCH 02] Кнопки в шапке (тема/язык/словари)
+   ========================================================================== */
+/* универсальный селектор для ваших "квадратных" кнопок в шапке */
+.header .toolBtn,
+#btnTheme, #btnLang, #btnDict {
+  background: var(--tool-bg) !important;
+  color: var(--tool-fg) !important;
+  border: 1px solid var(--tool-border) !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .2s ease, border-color .2s ease, color .2s ease;
+}
+
+.header .toolBtn:hover,
+#btnTheme:hover, #btnLang:hover, #btnDict:hover {
+  border-color: rgba(34,197,94,.45); /* лёгкий green-hover */
+}
+
+.header .toolBtn:active,
+#btnTheme:active, #btnLang:active, #btnDict:active {
+  transform: translateY(1px);
+}
+
+/* Если у тебя обёртка-контейнер кнопок — сделаем горизонтально на всякий случай */
+.topControls, .header-tools, .headerButtons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+/* === Патч #dark-header-icons & стабильная "Не знаю" ===================== */
+/* 1) Иконки в шапке корректно выглядят в тёмной теме */
+:root[data-theme="dark"] header .iconBtn{
+  background: var(--card);
+  color: var(--text);
+  border-color: var(--border);
+  box-shadow: none;
+}
+header .iconBtn:hover{ filter: brightness(1.06); }
+header .iconBtn:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(52,211,153,.25);
+}
+
+/* 2) Кнопка "Не знаю": без мигания и пунктирной обводки */
+button.ghost{
+  outline: none;
+  border: 1px solid var(--border);
+  box-shadow: none;
+  will-change: transform, filter; /* сглаживает артефакты на iOS */
+}
+button.ghost:focus, button.ghost:focus-visible{
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52,211,153,.20);
+}
+button.ghost:active{ transform: scale(0.98); }
+
+:root[data-theme="dark"] button.ghost{
+  background: #111827;
+  color: var(--text);
+  border: 1px solid #374151;
+  box-shadow: none; /* убираем inset, из-за него мигало */
+}
+/* === конец патча ======================================================== */
+
+/* конец! */
+
+
+/* ── TEMP sets bar (визуал до логики) ───────────────────────────────── */
+.setsBar{
+  display:flex; flex-wrap:wrap; gap:8px;
+  justify-content:center;
+  margin:10px 0 8px;      /* между словом и вариантами */
+}
+
+.setsBar .setTile{
+  min-width:40px; height:40px; padding:0 10px;
+  border:1px solid var(--border);
+  background:#fff; color:inherit;
+  border-radius:10px; cursor:pointer; font-weight:700;
+}
+:root[data-theme="dark"] .setsBar .setTile{ background:var(--card); }
+.setsBar .setTile:active{ transform:scale(0.97); }
+/* ── Отступ плиток от шапки ───────────────────────────────────────── */
+#setsBar {
+  margin-top: 100px;   /* отодвигаем вниз от header */
+}
+/* === Sets bar === */
+#setsBar{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;   /* центрируем плитки */
+  align-items: center;
+  gap: 8px 10px;              /* горизонт./вертик. интервалы */
+  padding: 8px 0 4px;
+  margin: 6px 0 8px;
+}
+
+/* Плитки наборов */
+#setsBar .setTile{
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border, #d0d0d0);
+  background: var(--card, #fff);
+  color: var(--text, inherit);
+  font-weight: 700;
+  user-select: none;
+  cursor: pointer;
+  transition: transform .12s ease, background .12s ease, border-color .12s ease;
+}
+#setsBar .setTile:hover{ transform: translateY(-1px); }
+#setsBar .setTile.active{
+  border: 2px solid var(--accent, #4aa3ff);
+}
+#setsBar .setTile.done{
+  background: var(--green, #2ecc71);
+  border-color: var(--green, #2ecc71);
+  color: #fff;
+}
+
+/* Инфострока под плитками (центр, мягкая) */
+#setsBar .setsBadge{
+  width: 100%;
+  text-align: center;
+  margin-top: 6px;
+  font-size: 12px;
+  opacity: .7;
+}
+
+/* Немного компактнее на очень узких экранах */
+@media (max-width: 360px){
+  #setsBar .setTile{
+    min-width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    padding: 0 8px;
+    font-size: 14px;
+  }
+}
+/* === Sets bar — компактный вид и мягкая заливка === */
+#setsBar{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px 8px;             /* было больше — уменьшили */
+  padding: 6px 0 2px;       /* компактнее */
+  margin: 4px 0 6px;        /* компактнее */
+}
+
+#setsBar .setTile{
+  min-width: 30px;          /* было 36 — уменьшили */
+  height: 30px;             /* было 36 — уменьшили */
+  padding: 0 8px;           /* было 10 — уменьшили */
+  border-radius: 8px;       /* слегка меньше */
+  border: 1px solid var(--border, #d0d0d0);
+  background: var(--card, #fff);
+  color: var(--text, inherit);
+  font-weight: 700;
+  font-size: 13px;          /* шрифт компактнее */
+  user-select: none;
+  cursor: pointer;
+  transition: transform .12s ease, background .12s ease, border-color .12s ease;
+}
+
+#setsBar .setTile:hover{
+  transform: translateY(-1px);
+}
+
+#setsBar .setTile.active{
+  border-width: 2px;
+  border-color: var(--accent, #4aa3ff);
+}
+
+/* Мягкая, «не кричащая» заливка для выученных */
+#setsBar .setTile.done{
+  /* зелёный с прозрачностью ~18% + более выраженная граница */
+  background: rgba(34, 197, 94, 0.18);   /* #22c55e @ 18% */
+  border-color: rgba(34, 197, 94, 0.7);
+  color: inherit;                         /* не делаем белым, чтобы не перетягивал внимание */
+}
+
+/* Бейдж под плитками — центр и скромный тон */
+#setsBar .setsBadge{
+  width: 100%;
+  text-align: center;
+  margin-top: 4px;          /* чуть меньше */
+  font-size: 12px;
+  opacity: .75;             /* читаемо, но спокойнее */
+}
+
+/* Совсем узкие экраны — ещё компактнее */
+@media (max-width: 360px){
+  #setsBar .setTile{
+    min-width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    padding: 0 6px;
+    font-size: 12px;
+  }
+}

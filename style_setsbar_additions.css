@@ -1,0 +1,145 @@
+// sets.ui.addon.js — tiles with meta + live badge + activeKey watcher
+(function(){
+  function getSetSizeSafe(){
+    var ss = 50;
+    try { ss = Number(App && App.state && App.state.setSize); } catch(e){}
+    if (!Number.isFinite(ss) || ss < 2) ss = 50;
+    return ss;
+  }
+
+  // Calculate meta for active key using Trainer meta or fallback by deck length
+  function calcMetaForActiveKey(){
+    var key = (window.App && App.dictRegistry && App.dictRegistry.activeKey) || null;
+    var setSize = getSetSizeSafe();
+
+    var total = 0, active = 0, completed = [];
+
+    if (window.App && App.Trainer && typeof App.Trainer.getBatchesMeta === 'function'){
+      var m = App.Trainer.getBatchesMeta(key);
+      if (m && typeof m.total === 'number'){
+        total = m.total|0;
+        active = (m.active|0) || 0;
+        completed = Array.isArray(m.completed) ? m.completed.slice(0,total) : new Array(total).fill(false);
+      } else if (Array.isArray(m)) {
+        total = m.length|0;
+        active = (typeof App.Trainer.getBatchIndex === 'function') ? (App.Trainer.getBatchIndex(key)|0) : 0;
+        completed = m.map(function(x){ return !!(x && (x.done === true || x === true)); });
+      }
+    }
+
+    if (!total){
+      // Fallback by deck length (works for fav and any custom decks)
+      var deck = (App && App.Decks && App.Decks.resolveDeckByKey) ? (App.Decks.resolveDeckByKey(key)||[]) : [];
+      total = Math.max(1, Math.ceil(deck.length / setSize));
+      active = (typeof App.Trainer === 'object' && typeof App.Trainer.getBatchIndex === 'function')
+        ? (App.Trainer.getBatchIndex(key, total)|0) : 0;
+      completed = new Array(total).fill(false);
+    }
+
+    return { key:key, total:total, active:active, completed:completed, setSize:setSize };
+  }
+
+  function renderSetsBar(){
+    var host = document.getElementById('setsBar');
+    if (!host) return;
+    host.innerHTML = '';
+
+    var meta = calcMetaForActiveKey();
+    if (!meta || !meta.total) return;
+
+    for (var i=0; i<meta.total; i++){
+      var btn = document.createElement('button');
+      btn.className = 'setTile';
+      btn.type = 'button';
+      btn.textContent = String(i+1);
+      if (i === meta.active){ btn.classList.add('active'); btn.setAttribute('aria-current','true'); }
+      if (meta.completed[i]){ btn.classList.add('done'); }
+      btn.setAttribute('aria-pressed', (i===meta.active)?'true':'false');
+      (function(idx){
+        btn.addEventListener('click', function(){
+          try{
+            if (window.App && App.Trainer && typeof App.Trainer.setBatchIndex === 'function'){
+              App.Trainer.setBatchIndex(idx);
+            }
+            if (typeof window.renderCard === 'function') renderCard(true);
+            renderSetsBar();
+          }catch(e){}
+        });
+      })(i);
+      host.appendChild(btn);
+    }
+
+    // Info line under tiles (живой формат)
+    var badge = document.createElement('div');
+    badge.className = 'setsBadge';
+    var deckLen = 0;
+    try{
+      var deck = (App && App.Decks && App.Decks.resolveDeckByKey)
+        ? (App.Decks.resolveDeckByKey(meta.key)||[]) : [];
+      deckLen = deck.length|0;
+    }catch(e){}
+    badge.textContent =
+      'Набор ' + (meta.active+1) + ' из ' + meta.total +
+      ' • ' + meta.setSize + ' слов в наборе' +
+      ' • Всего слов: ' + deckLen;
+    badge.setAttribute('aria-hidden','true');
+    host.appendChild(badge);
+  }
+
+  // Hooks на существующие перерисовки
+  if (typeof window.renderCard === 'function'){
+    var __origRC = window.renderCard;
+    window.renderCard = function(){
+      var r = __origRC.apply(this, arguments);
+      try { renderSetsBar(); } catch(e){}
+      return r;
+    };
+  }
+  if (typeof window.renderDictList === 'function'){
+    var __origDL = window.renderDictList;
+    window.renderDictList = function(){
+      var r = __origDL.apply(this, arguments);
+      try { renderSetsBar(); } catch(e){}
+      return r;
+    };
+  }
+
+  // 🔭 Лёгкий watcher активного словаря/размера набора
+  var __lastKey = null;
+  var __lastSize = null;
+  var __timer = null;
+
+  function tickWatch(){
+    if (document.hidden) return; // экономим батарейку
+    var k = (window.App && App.dictRegistry && App.dictRegistry.activeKey) || null;
+    var s = getSetSizeSafe();
+    if (k !== __lastKey || s !== __lastSize){
+      __lastKey = k;
+      __lastSize = s;
+      try { renderSetsBar(); } catch(e){}
+    }
+  }
+  function startWatch(){
+    if (__timer) return;
+    __lastKey = (window.App && App.dictRegistry && App.dictRegistry.activeKey) || null;
+    __lastSize = getSetSizeSafe();
+    __timer = setInterval(tickWatch, 300); // мягкая частота, без нагрузки
+    document.addEventListener('visibilitychange', function(){
+      if (!document.hidden) setTimeout(tickWatch, 50);
+    });
+  }
+
+  // Initial
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', function(){
+      renderSetsBar();
+      startWatch();
+    });
+  } else {
+    renderSetsBar();
+    startWatch();
+  }
+
+  // export
+  window.renderSetsBar = renderSetsBar;
+})();
